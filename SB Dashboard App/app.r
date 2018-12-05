@@ -1,6 +1,12 @@
-library(leaflet)
-library(rgeos)
+library(rsconnect)
+library(shiny)
 library(rgdal)
+library(leaflet)
+library(DT)
+library(raster)
+library(rgeos)
+library(ggplot2)
+library(tidyverse)
 
 #Load data sets
 schoolsSpatial <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/Data-Viz-2018-Fall/FinalProject", layer = "School_Boundaries")
@@ -10,8 +16,9 @@ parksPoints <- read.csv("C:/Users/kost1/Documents/GitHub/Data-Viz-2018-Fall/Fina
 parksSpatial <- SpatialPointsDataFrame(coords = parksPoints[,c("Lon","Lat")], data = parksPoints,
                                        proj4string = CRS("+proj=longlat +datum=WGS84"))
 
-AbandonedPropertyParcels <- readOGR(dsn = "../datasets/Abandoned_Property_Parcels/", layer = "Abandoned_Property_Parcels", stringsAsFactors = FALSE)
-CityCouncilDistricts <- readOGR(dsn = "../datasets/City_Council_Districts/", layer = "City_Council_Districts", stringsAsFactors = FALSE)
+AbandonedPropertyParcels <- readOGR(dsn = ".C:/Users/kost1/Documents/GitHub/Data-Viz-2018-Fall/FinalProject/data/Abandoned_Property_Parcels/", layer = "Abandoned_Property_Parcels", stringsAsFactors = FALSE)
+CityCouncilDistricts <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/Data-Viz-2018-Fall/FinalProject/data/City_Council_Districts/", layer = "City_Council_Districts", stringsAsFactors = FALSE)
+
 AbandonedPropertyParcels.center <- SpatialPointsDataFrame(gCentroid(AbandonedPropertyParcels, byid=TRUE), 
                                                           AbandonedPropertyParcels@data, match.ID=FALSE)
 
