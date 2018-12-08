@@ -23,6 +23,7 @@ AbandonedPropertyParcels.center <- SpatialPointsDataFrame(gCentroid(AbandonedPro
                                                           AbandonedPropertyParcels@data, match.ID=FALSE)
 census <- readOGR(dsn="/Users/Samantha/Documents/R/Data Visualization",layer ='2010_CensusData', stringsAsFactors = FALSE)
 public_facilities <- read.csv('C:/Users/Samantha/Documents/R/Data Visualization/Public_Facilities (1).csv')
+facilities.spatial <- SpatialPointsDataFrame(coords = public_facilities[,c("Lon","Lat")], data = public_facilities, proj4string = CRS("+proj=longlat +datum=WGS84"))
 
 #Create pop ups
 parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
