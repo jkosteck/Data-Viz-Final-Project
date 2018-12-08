@@ -21,6 +21,8 @@ CityCouncilDistricts <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/Data-Viz-
 
 AbandonedPropertyParcels.center <- SpatialPointsDataFrame(gCentroid(AbandonedPropertyParcels, byid=TRUE), 
                                                           AbandonedPropertyParcels@data, match.ID=FALSE)
+census <- readOGR(dsn="/Users/Samantha/Documents/R/Data Visualization",layer ='2010_CensusData', stringsAsFactors = FALSE)
+public_facilities <- read.csv('C:/Users/Samantha/Documents/R/Data Visualization/Public_Facilities (1).csv')
 
 #Create pop ups
 parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
@@ -83,7 +85,19 @@ ui <- fluidPage(
              
              tabPanel("Udai"
              ),
-             tabPanel("Sam"
+             tabPanel("Map of Public Facilities and Census Data"), 
+             "This tab shows a map of public facilities and census data in the Notre Dame Area. The intent of this analysis is to enable one to formulate a strategy on selecting
+             optimal locations for building public facilities in the future, as public facilities should be built in areas of high populations as the utilization rate should be
+             higher. 
+             When clicking on a colored area on the map, the name of the region will appear. Additionally, when clicking on a marker, the name of the type of facility will appear.
+             The areas are colored by total population, therefore the area with the highest population will be colored blue, and the lowest population will be colored red (legend)
+             shown to the bottom left. Lastly, one can select to only show specific facility types by selecting types at the top.",
+             sidebarLayout(
+               sidebarPanel(
+                 checkboxGroupInput("Type",
+                                    "Choose Facility Type",
+                                    choices = unique(facilities.spatial@data$POPL_TYPE),
+                                    selected = unique(facilities.spatial@data$POPL_TYPE))
              ),
              tabPanel("Contact Us",
                       textInput("firstContact", "First Name:"),
@@ -131,7 +145,19 @@ server <- function(input, output) {
       scale_fill_brewer(palette="Accent", na.value="grey") #same palette as palette for map
   })
   
+  
+  pal <- colorNumeric(palette = "RdYlBu", domain = census$SE_T002_01)
+  
+  output$Map <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      addMarkers(data = public_facilities[public_facilities$POPL_TYPE %in% input$Type,], 
+                 popup = paste("Facility Type:",public_facilities$POPL_TYPE)) %>%
+      addPolygons(data = census,popup = paste("Area Name:",census$NAMELSAD), color = ~pal(SE_T002_01)) %>%
+      addLegend(data = census, position = "bottomright", pal = pal, 
+                values = ~SE_T002_01, title = "Total Population", opacity = 1)  
+  
+})
 }
-
 # Run the application 
 shinyApp(ui = ui, server = server)
