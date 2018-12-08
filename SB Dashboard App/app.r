@@ -25,6 +25,12 @@ census <- readOGR(dsn="/Users/Samantha/Documents/R/Data Visualization",layer ='2
 public_facilities <- read.csv('C:/Users/Samantha/Documents/R/Data Visualization/Public_Facilities (1).csv')
 facilities.spatial <- SpatialPointsDataFrame(coords = public_facilities[,c("Lon","Lat")], data = public_facilities, proj4string = CRS("+proj=longlat +datum=WGS84"))
 
+
+street_lights <- read.csv("C:/Users/kost1/Documents/GitHub/Data-Viz-2018-Fall/FinalProject/Street_Lights.csv", stringsAsFactors = F)
+street_lights[street_lights$Pole_Type %in% c(""," "),]$Pole_Type <- "Unknown"
+street_lights[street_lights$Service %in% c(""," "),]$Service <- "Unknown"
+street_lights$Inspect_Date2 <- as.Date(street_lights$Inspect_Date)
+
 #Create pop ups
 parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
                             "Type: ",parksSpatial$Park_Type,"<br>",
@@ -84,7 +90,19 @@ ui <- fluidPage(
              ),
              #END ASHLEY
              
-             tabPanel("Udai"
+             tabPanel("Street Lights",
+                      sidebarLayout(
+                        sidebarPanel(
+                          dateRangeInput(inputId = "dates", label = "Date range", startview = "year",start="2010-01-01"),
+                          selectInput(inputId = "variable", label = "Variable:",choices = c("Pole_Type","Service"))
+                        ),#end sidebarPanel
+                        
+                        mainPanel(
+                          tabsetPanel(
+                            tabPanel("Map",leafletOutput(outputId = "map"))
+                          )#end TabsetPanel          
+                        )#end mainPanel
+                      )#end sidebarLayout
              ),
              tabPanel("Map of Public Facilities and Census Data"), 
              "This tab shows a map of public facilities and census data in the Notre Dame Area. The intent of this analysis is to enable one to formulate a strategy on selecting
@@ -110,6 +128,7 @@ ui <- fluidPage(
                       actionButton("sendEmail", "Send Email")
              )
   )
+)
 )
 
 # Define server logic required to draw a histogram
@@ -159,6 +178,16 @@ server <- function(input, output) {
                 values = ~SE_T002_01, title = "Total Population", opacity = 1)  
   
 })
+  
+  data <- eventReactive(input$dates,{
+    return(street_lights[street_lights$Inspect_Date2 >= input$dates[1]& street_lights$Inspect_Date2 <= input$dates[2],])
+  })
+  output$map <-  renderLeaflet({
+    leaflet(data= data())%>%
+      addTiles()%>%
+      addMarkers(~Lon, ~Lat, popup = ~Pole_Num_1)
+  })
+  output$texty <- renderText(paste(input$dates[1]))
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
