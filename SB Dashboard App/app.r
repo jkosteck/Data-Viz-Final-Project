@@ -221,10 +221,10 @@ server <- function(input, output) {
   
   observeEvent(input$sendEmail, {
     
-    emailBody <- HTML(paste(input$messageContact, "\n
-The following message was sent by\n
-                        Name:", input$firstContact, input$lastContact, "\n",
-                            "Phone:", input$phoneContact, "\n",
+    emailBody <- HTML(paste(input$messageContact, "<br><br>
+The following message was sent by<br>
+                        Name:", input$firstContact, input$lastContact, "<br>",
+                            "Phone:", input$phoneContact, "<br>",
                             "Email:", input$emailContact
     ))
     
