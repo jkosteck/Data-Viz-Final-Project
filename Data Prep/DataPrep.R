@@ -42,11 +42,6 @@ AbandonedPropertyParcels$popup <- paste("<b>",AbandonedPropertyParcels$Outcome_S
 CityCouncilDistricts$popupCouncils <- paste("<b>","District: ", CityCouncilDistricts$OBJECTID, "</b><br>",
                                             "Council Member: ", CityCouncilDistricts$Council_Me)
 
-#Set color palettes
-palParks <- colorFactor(palette = 'Set1', domain = parksSpatial$Park_Type)
-palProperties <- colorFactor(palette = "Accent", domain =AbandonedPropertyParcels$Outcome_St)
-palCenus <- colorNumeric(palette = "RdYlBu", domain = census$SE_T002_01)
-
 facilitiesCheckboxChoices <- unique(facilities.spatial@data$POPL_TYPE)
 facilitiesCheckboxSelected <- unique(facilities.spatial@data$POPL_TYPE)
 
@@ -101,4 +96,10 @@ parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
                             parksSpatial$stringFeatures,
                             sep ="")
 
+#Set color palettes
+palParks <- colorFactor(palette = 'RdYlBu', domain = parksSpatial$Park_Type)
+palProperties <- colorFactor(palette = "RdYlBu", domain =AbandonedPropertyParcels$Outcome_St)
+palCenus <- colorNumeric(palette = "RdYlBu", domain = census$SE_T002_01)
+palSchools <- colorFactor(palette = "Dark2", domain = schoolsSpatial$SchoolType)
+  
 save.image(file = "SB Dashboard App/appData.RData")

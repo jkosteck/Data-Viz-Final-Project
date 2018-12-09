@@ -16,6 +16,9 @@ setwd("~")
 # Load App Data
 load("./GitHub/Data-Viz-Final-Project/SB Dashboard App/appData.RData")
 
+parksChoices <- sort(unique(parksPoints$Park_Type))
+schoolChoices <- sort(unique(schoolsSpatial$SchoolType))
+
 #Create UI
 ui <- fluidPage(
   
@@ -32,9 +35,24 @@ ui <- fluidPage(
                                  "Below is a map of the schools and parks in South Bend. Schools are represented as ploygons,
                                  while parks are represented as dots. The parks are colored according to the park type, and
                                  schools are colored according to their status as private or public.",
-                                 leafletOutput("schoolsParksPlot",
-                                               height = 600,
-                                               width = "90%")), 
+                                 sidebarLayout(
+                                   sidebarPanel(
+                                     checkboxGroupInput("parkType",
+                                                        "Choose Park Type",
+                                                        choices = parksChoices,
+                                                        selected = parksChoices),
+                                     checkboxGroupInput("schoolType",
+                                                        "Choose School Type",
+                                                        choices = schoolChoices,
+                                                        selected = schoolChoices)
+                                   ),
+                                   mainPanel(
+                                     leafletOutput("schoolsParksPlot",
+                                                   height = 600,
+                                                   width = "90%")
+                                   )
+                                 )
+                        ),
                         #show a bar graph of the abandoned properties by district
                         tabPanel("Data Set",
                                  h3("Schools and Parks Data Set"),
@@ -65,7 +83,10 @@ ui <- fluidPage(
                       br(),br(),
                       tabsetPanel(
                         #show a map of the abandoned properties
-                        tabPanel("Map", h3("Map of Abandoned Properties in South Bend"), leafletOutput("AbandonedPropertyParcels", height = 600, width = "90%")), 
+                        tabPanel("Map", h3("Map of Abandoned Properties in South Bend"),
+                                 leafletOutput("AbandonedPropertyParcels",
+                                               height = 600,
+                                               width = "90%")), 
                         #show a bar graph of the abandoned properties by district
                         tabPanel("Bar Graph",
                                  h3("Bar Graph of Abandoned Properties by District"),
@@ -115,7 +136,11 @@ ui <- fluidPage(
                                              choices = facilitiesCheckboxChoices,
                                              selected = facilitiesCheckboxSelected)
                         ),
-                        mainPanel()
+                        mainPanel(
+                          leafletOutput("facilitiesPlot",
+                                        height = 600,
+                                        width = "90%")
+                        )
                       )
              ),
              tabPanel("Contact Us",
@@ -147,9 +172,20 @@ server <- function(input, output) {
   output$schoolsParksPlot <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
-      addCircleMarkers(data = parksSpatial, popup = ~popup, color=~palParks(Park_Type), stroke = 0, fillOpacity=1, radius=4) %>%
-      addLegend(pal = palParks, values = parksSpatial$Park_Type) %>%
-      addPolygons(data = schoolsSpatial, color = "blue", weight = 2, opacity = 0.6, popup = ~School)  
+      addCircleMarkers(data = parksSpatial[parksSpatial$Park_Type %in% input$parkType,],
+                       popup = ~popup,
+                       color = ~palParks(Park_Type), 
+                       stroke = 0, fillOpacity=1,
+                       radius=4) %>%
+      addLegend(pal = palParks,
+                values = parksSpatial$Park_Type) %>%
+      addPolygons(data = schoolsSpatial[schoolsSpatial$SchoolType %in% input$schoolType,],
+                  color = ~palSchools(SchoolType),
+                  weight = 3,
+                  opacity = 0.7,
+                  popup = ~School) %>%
+      addLegend(pal = palSchools,
+                values = schoolsSpatial$SchoolType)
   })
   
   output$schoolsTable <- renderDataTable({
@@ -164,7 +200,7 @@ server <- function(input, output) {
   extensions = c("Buttons"),
   options = list(dom = 'Bfrtip',
                  buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-                 )
+  )
   )
   
   output$parksTable <- renderDataTable({
@@ -200,7 +236,7 @@ server <- function(input, output) {
       scale_fill_brewer(palette="Accent", na.value="grey") #same palette as palette for map
   })
   
-  output$Map <- renderLeaflet({
+  output$facilitiesPlot <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
       addMarkers(data = public_facilities[public_facilities$POPL_TYPE %in% input$Type,], 
