@@ -96,10 +96,13 @@ parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
                             parksSpatial$stringFeatures,
                             sep ="")
 
+parksChoices <- sort(unique(parksPoints$Park_Type))
+schoolChoices <- sort(unique(schoolsSpatial$SchoolType))
+
 #Set color palettes
 palParks <- colorFactor(palette = 'RdYlBu', domain = parksSpatial$Park_Type)
 palProperties <- colorFactor(palette = "RdYlBu", domain =AbandonedPropertyParcels$Outcome_St)
 palCenus <- colorNumeric(palette = "RdYlBu", domain = census$SE_T002_01)
 palSchools <- colorFactor(palette = "Dark2", domain = schoolsSpatial$SchoolType)
-  
+
 save.image(file = "SB Dashboard App/appData.RData")

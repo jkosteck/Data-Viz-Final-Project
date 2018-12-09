@@ -16,9 +16,6 @@ setwd("~")
 # Load App Data
 load("./GitHub/Data-Viz-Final-Project/SB Dashboard App/appData.RData")
 
-parksChoices <- sort(unique(parksPoints$Park_Type))
-schoolChoices <- sort(unique(schoolsSpatial$SchoolType))
-
 #Create UI
 ui <- fluidPage(
   
