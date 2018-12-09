@@ -104,10 +104,7 @@ ui <- fluidPage(
                           dateRangeInput(inputId = "dates",
                                          label = "Date range",
                                          startview = "year",
-                                         start="2010-01-01"),
-                          selectInput(inputId = "variable",
-                                      label = "Variable:",
-                                      choices = c("Pole_Type","Service"))
+                                         start="2010-01-01")
                         ),#end sidebarPanel
                         
                         mainPanel(
