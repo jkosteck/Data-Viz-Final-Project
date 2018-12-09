@@ -78,6 +78,9 @@ ui <- fluidPage(
              #END ASHLEY
              
              tabPanel("Street Lights",
+                      h3("Map of Street Lights in South Bend Area"),
+                      "Below is a map of the street lights in South Bend area.",
+                      br(),br(),
                       sidebarLayout(
                         sidebarPanel(
                           dateRangeInput(inputId = "dates",
@@ -92,7 +95,7 @@ ui <- fluidPage(
                         mainPanel(
                           tabsetPanel(
                             tabPanel("Map",
-                                     leafletOutput(outputId = "map"))
+                                     leafletOutput(outputId = "streetlightsmap"))
                           )#end TabsetPanel          
                         )#end mainPanel
                       )#end sidebarLayout
@@ -212,7 +215,7 @@ server <- function(input, output) {
     return(street_lights[street_lights$Inspect_Date2 >= input$dates[1]& street_lights$Inspect_Date2 <= input$dates[2],])
   })
   
-  output$map <-  renderLeaflet({
+  output$streetlightsmap <-  renderLeaflet({
     leaflet(data = streetLights())%>%
       addTiles()%>%
       addMarkers(~Lon, ~Lat, popup = ~Pole_Num_1)
