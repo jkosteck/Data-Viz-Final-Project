@@ -11,81 +11,40 @@ library(rJava)
 library(mailR)
 library(shinyAce)
 
-########### Load data sets ###########
-#School data
-schoolsSpatial <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/data-Viz-Final-Project/data/School_Boundaries",
-                          layer = "School_Boundaries")
+setwd("~")
 
-#Park data
-parksPoints <- read.csv("C:/Users/kost1/Documents/GitHub/data-Viz-Final-Project/data/Parks_Locations_and_Features.csv",
-                        stringsAsFactors = F)
-
-#Abandoned Property data
-AbandonedPropertyParcels <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/data-Viz-Final-Project/data/Abandoned_Property_Parcels",
-                                    layer = "Abandoned_Property_Parcels",
-                                    stringsAsFactors = FALSE)
-
-#City Council data
-CityCouncilDistricts <- readOGR(dsn = "C:/Users/kost1/Documents/GitHub/Data-Viz-Final-Project/Data/City_Council_Districts",
-                                layer = "City_Council_Districts",
-                                stringsAsFactors = FALSE)
-
-#Cenus data
-census <- readOGR(dsn="C:/Users/kost1/Documents/GitHub/Data-Viz-Final-Project/Data/2010_Cenusdata",
-                  layer ='2010_CensusData',
-                  stringsAsFactors = FALSE)
-
-parksSpatial <- SpatialPointsDataFrame(coords = parksPoints[,c("Lon","Lat")], data = parksPoints,
-                                       proj4string = CRS("+proj=longlat +datum=WGS84"))
-
-
-AbandonedPropertyParcels.center <- SpatialPointsDataFrame(gCentroid(AbandonedPropertyParcels, byid=TRUE), 
-                                                          AbandonedPropertyParcels@data, match.ID=FALSE)
-
-public_facilities <- read.csv('C:/Users/kost1/Documents/GitHub/data-Viz-Final-Project/data/Public_Facilities.csv')
-facilities.spatial <- SpatialPointsDataFrame(coords = public_facilities[,c("Lon","Lat")], data = public_facilities, proj4string = CRS("+proj=longlat +datum=WGS84"))
-
-
-street_lights <- read.csv("C:/Users/kost1/Documents/GitHub/data-Viz-Final-Project/data/Street_Lights.csv", stringsAsFactors = F)
-street_lights[street_lights$Pole_Type %in% c(""," "),]$Pole_Type <- "Unknown"
-street_lights[street_lights$Service %in% c(""," "),]$Service <- "Unknown"
-street_lights$Inspect_Date2 <- as.Date(street_lights$Inspect_Date)
-
-#Create pop ups
-parksSpatial$popup <- paste("<b>",parksSpatial$Park_Name,"</b><br>",
-                            "Type: ",parksSpatial$Park_Type,"<br>",
-                            "Address: ",parksSpatial$Address,sep ="")
-
-AbandonedPropertyParcels$popup <- paste("<b>",AbandonedPropertyParcels$Outcome_St,"</b><br>",
-                                        "Address: ", AbandonedPropertyParcels$Address_Nu, AbandonedPropertyParcels$Street_Nam,AbandonedPropertyParcels$Suffix, "<br>", 
-                                        "Structure Type: ", AbandonedPropertyParcels$Structures, "<br>", 
-                                        "District: ", AbandonedPropertyParcels$Council_Di)
-
-CityCouncilDistricts$popupCouncils <- paste("<b>","District: ", CityCouncilDistricts$OBJECTID, "</b><br>",
-                                            "Council Member: ", CityCouncilDistricts$Council_Me)
-
-#Set color palettes
-palParks <- colorFactor(palette = 'Set1', domain = parksSpatial$Park_Type)
-palProperties <- colorFactor(palette = "Accent", domain =AbandonedPropertyParcels$Outcome_St)
-palCenus <- colorNumeric(palette = "RdYlBu", domain = census$SE_T002_01)
-
-facilitiesCheckboxChoices <- unique(facilities.spatial@data$POPL_TYPE)
-facilitiesCheckboxSelected <- unique(facilities.spatial@data$POPL_TYPE)
+# Load App Data
+load("./GitHub/Data-Viz-Final-Project/SB Dashboard App/appData.RData")
 
 #Create UI
 ui <- fluidPage(
   
   # Application title
   navbarPage("South Bend Facilities", id = "navFacilities",
-             
+             #START JOE
              tabPanel("Schools and Parks",
-                      
-                      titlePanel("Map of Facilities"),
-                      
-                      # Show a plot of the generated distribution
+                      titlePanel("Schools and Parks"),
                       br(),
-                      leafletOutput("schoolsParksPlot", height = 600, width = "80%")
+                      tabsetPanel(
+                        #show a map of the abandoned properties
+                        tabPanel("Map",
+                                 h3("Map of Schools and Parks in South Bend"),
+                                 "Below is a map of the schools and parks in South Bend. Schools are represented as ploygons,
+                                 while parks are represented as dots. The parks are colored according to the park type, and
+                                 schools are colored according to their status as private or public.",
+                                 leafletOutput("schoolsParksPlot",
+                                               height = 600,
+                                               width = "90%")), 
+                        #show a bar graph of the abandoned properties by district
+                        tabPanel("Data Set",
+                                 h3("Schools and Parks Data Set"),
+                                 DT::dataTableOutput("schoolsTable"),
+                                 DT::dataTableOutput("parksTable")
+                        )
+                      )
              ),
+             #END JOE
+             
              tabPanel("Doug"
              ),
              
@@ -108,7 +67,12 @@ ui <- fluidPage(
                         #show a map of the abandoned properties
                         tabPanel("Map", h3("Map of Abandoned Properties in South Bend"), leafletOutput("AbandonedPropertyParcels", height = 600, width = "90%")), 
                         #show a bar graph of the abandoned properties by district
-                        tabPanel("Bar Graph", h3("Bar Graph of Abandoned Properties by District"), plotOutput("plot_abandonedbydistrict", click = "plot_click", height = 600, width = "90%"))
+                        tabPanel("Bar Graph",
+                                 h3("Bar Graph of Abandoned Properties by District"),
+                                 plotOutput("plot_abandonedbydistrict",
+                                            click = "plot_click",
+                                            height = 600,
+                                            width = "90%"))
                       )
              ),
              #END ASHLEY
@@ -152,6 +116,9 @@ ui <- fluidPage(
                       )
              ),
              tabPanel("Contact Us",
+                      titlePanel("Contact the city of South Bend"),
+                      "Fill out the form below to contact the city of South Bend.
+                      We will respond to your inquiry as soon as possible.",
                       sidebarLayout(
                         sidebarPanel(
                           textInput("firstContact", "First Name:"),
@@ -181,6 +148,32 @@ server <- function(input, output) {
       addLegend(pal = palParks, values = parksSpatial$Park_Type) %>%
       addPolygons(data = schoolsSpatial, color = "blue", weight = 2, opacity = 0.6, popup = ~School)  
   })
+  
+  output$schoolsTable <- renderDataTable({
+    parksPoints %>%
+      select(`Park Name` = Park_Name,
+             `Park Type` = Park_Type,
+             Address,
+             Features = stringFeatures) %>%
+      mutate(Features = gsub(pattern = "<br>", replacement = ", ", x = Features))
+  },
+  server = FALSE,
+  extensions = c("Buttons"),
+  options = list(dom = 'Bfrtip',
+                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                 )
+  )
+  
+  output$parksTable <- renderDataTable({
+    schoolsSpatial@data %>%
+      select(-OBJECTID)
+  },
+  server = FALSE,
+  extensions = c("Buttons"),
+  options = list(dom = 'Bfrtip',
+                 buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+  )
+  )
   
   #create leaflet map - ASHLEY
   output$AbandonedPropertyParcels <- renderLeaflet({
@@ -231,8 +224,8 @@ server <- function(input, output) {
     emailBody <- HTML(paste(input$messageContact, "\n
 The following message was sent by\n
                         Name:", input$firstContact, input$lastContact, "\n",
-                        "Phone:", input$phoneContact, "\n",
-                        "Email:", input$emailContact
+                            "Phone:", input$phoneContact, "\n",
+                            "Email:", input$emailContact
     ))
     
     send.mail(from = "southbendcitymailbox@gmail.com",
