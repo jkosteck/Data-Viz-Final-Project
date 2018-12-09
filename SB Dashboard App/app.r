@@ -97,7 +97,8 @@ ui <- fluidPage(
              
              tabPanel("Street Lights",
                       h3("Map of Street Lights in South Bend Area"),
-                      "Below is a map of the street lights in South Bend area.",
+                      "Below is a map of the street lights in South Bend area.The tab also filters street lights based on the last inspection date range to help determine areas where 
+                      immediate inspection needs to be done.",
                       br(),br(),
                       sidebarLayout(
                         sidebarPanel(
