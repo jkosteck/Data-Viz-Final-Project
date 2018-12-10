@@ -60,7 +60,7 @@ ui <- fluidPage(
              ),
              #END JOE
              
-             tabPanel("Code Enforcement Cases",
+             tabPanel(
                #Start Doug
                titlePanel("Code Enforcement Cases Locations"),
                
@@ -77,6 +77,12 @@ ui <- fluidPage(
                )
              ),
              #END Doug
+             
+             
+             
+             
+             
+             
              
              #START ASHLEY
              tabPanel("Abandoned Properties",
@@ -132,7 +138,7 @@ ui <- fluidPage(
                       )#end sidebarLayout
              ),
              
-             tabPanel("Public Facilities and Census data", 
+             tabPanel("Map of Public Facilities and Census data", 
                       "This tab shows a map of public facilities and census data in the Notre Dame Area. The intent of this analysis is to enable one to formulate a strategy on selecting
              optimal locations for building public facilities in the future, as public facilities should be built in areas of high populations as the utilization rate should be
              higher. 
@@ -224,12 +230,6 @@ server <- function(input, output) {
   )
   )
   
-  output$dougMap <- renderLeaflet({
-    leaflet()  %>%
-      addTiles()  %>%
-      addMarkers(data = code.spatial,  clusterOptions = markerClusterOptions())
-  })
-  
   #create leaflet map - ASHLEY
   output$AbandonedPropertyParcels <- renderLeaflet({
     leaflet()  %>%
@@ -262,6 +262,17 @@ server <- function(input, output) {
                 values = ~SE_T002_01, title = "Total Population", opacity = 1)  
     
   })
+  
+  
+  
+  output$dougMap <- renderLeaflet({
+    leaflet()  %>%
+      addTiles()  %>%
+      addMarkers(data = code.spatial,  clusterOptions = markerClusterOptions())
+  })
+  
+  
+  
   
   streetLights <- eventReactive(input$dates,{
     return(street_lights[street_lights$Inspect_Date2 >= input$dates[1]& street_lights$Inspect_Date2 <= input$dates[2],])
