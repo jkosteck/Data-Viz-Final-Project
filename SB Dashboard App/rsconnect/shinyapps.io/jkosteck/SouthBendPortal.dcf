@@ -5,8 +5,8 @@ account: jkosteck
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 611302
-bundleId: 1751897
+bundleId: 1751918
 url: https://jkosteck.shinyapps.io/SouthBendPortal/
-when: 1544412243.49471
+when: 1544413245.3227
 asMultiple: FALSE
 asStatic: FALSE

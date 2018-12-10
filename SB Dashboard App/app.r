@@ -91,8 +91,7 @@ ui <- fluidPage(
                       about each property.",
                       br(),br(),
                       "The bar graph below the map shows the count of each property's status broken out by district. This
-                      is a quick way to compare the number of abandoned properties in each district. This graph is also
-                      color-coded the same way that the map is.",
+                      is a quick way to compare the number of abandoned properties in each district.",
                       br(),br(),
                       tabsetPanel(
                         #show a map of the abandoned properties
@@ -240,7 +239,12 @@ server <- function(input, output) {
                   weight = 2,
                   opacity = 1,
                   color = "white") %>% 
-      addPolylines(data = AbandonedPropertyParcels, popup = ~popup, color = ~palProperties(Outcome_St), fillOpacity = 1)
+      addPolylines(data = AbandonedPropertyParcels,
+                   popup = ~popup,
+                   color = ~palProperties(Outcome_St),
+                   fillOpacity = 1) %>%
+      addLegend(pal = palProperties,
+                values = AbandonedPropertyParcels$Outcome_St)
   })
   
   #create bar graph - ASHLEY
