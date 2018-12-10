@@ -5,6 +5,16 @@ library(rgeos)
 
 setwd("~/GitHub/Data-Viz-Final-Project")
 
+
+code_enf  <- read.csv("./data/Code_Enforcement_Cases.csv",
+                      stringsAsFactors = FALSE)
+
+
+code.spatial <- SpatialPointsDataFrame(coords = code_enf[,c("Lon","Lat")], data = code_enf,
+                                       proj4string = CRS("+proj=longlat +datum=WGS84"))
+
+code.spatial$Case_Type_Code_Description <- as.factor(code.spatial$Case_Type_Code_Description)
+
 ########### Load data sets ###########
 #Abandoned Property data
 AbandonedPropertyParcels <- readOGR(dsn = "./data/Abandoned_Property_Parcels",

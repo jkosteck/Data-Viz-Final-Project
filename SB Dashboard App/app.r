@@ -11,10 +11,11 @@ library(rJava)
 library(mailR)
 library(shinyAce)
 
-setwd("~")
+#setwd("~")
 
 # Load App Data
-load("./GitHub/Data-Viz-Final-Project/SB Dashboard App/appData.RData")
+#load("./GitHub/Data-Viz-Final-Project/SB Dashboard App/appData.RData")
+load("appData.RData")
 
 #Create UI
 ui <- fluidPage(

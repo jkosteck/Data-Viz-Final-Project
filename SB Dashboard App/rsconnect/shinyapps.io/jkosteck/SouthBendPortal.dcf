@@ -1,0 +1,12 @@
+name: SouthBendPortal
+title: SouthBendPortal
+username:
+account: jkosteck
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 611302
+bundleId: 1751897
+url: https://jkosteck.shinyapps.io/SouthBendPortal/
+when: 1544412243.49471
+asMultiple: FALSE
+asStatic: FALSE
